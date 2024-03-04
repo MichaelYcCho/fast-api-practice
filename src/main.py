@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import Body, FastAPI
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -42,3 +42,14 @@ class CreateTodoRequest(BaseModel):
 def create_todo_handler(request: CreateTodoRequest):
     todo_data[request.id] = request.model_dump()
     return todo_data[request.id]
+
+
+# embed=True로 하면 body에 있는 값이 아래의 is_done에 들어간다.(하나의 필드만 뽑아서 사용할 때)
+@app.patch("/todos/{todo_id}")
+def update_todo_handler(todo_id: int, is_done: bool = Body(..., embed=True)):
+    todo = todo_data.get(todo_id, {})
+    if todo:
+        todo["is_done"] = is_done
+        return todo
+
+    return {}
