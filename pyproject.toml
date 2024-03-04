@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "fast-api-practice"
+version = "0.1.0"
+description = ""
+authors = ["Michael Youngchan CHO <michael.yc.cho@gmail.com>"]
+readme = "README.md"
+packages = [{include = "fast_api_practice"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.110.0"
+uvicorn = "^0.27.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
