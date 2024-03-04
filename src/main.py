@@ -23,3 +23,8 @@ def get_todos_handler(order: str | None = None):
         return ret[::-1]
     else:
         return ret
+
+
+@app.get("/todos/{todo_id}")
+def get_todo_handler(todo_id: int):
+    return todo_data.get(todo_id, {})
