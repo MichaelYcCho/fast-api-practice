@@ -1,4 +1,4 @@
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, HTTPException
 from pydantic import BaseModel
 
 app = FastAPI()
@@ -26,9 +26,12 @@ def get_todos_handler(order: str | None = None):
         return ret
 
 
-@app.get("/todos/{todo_id}")
+@app.get("/todos/{todo_id}", status_code=200)
 def get_todo_handler(todo_id: int):
-    return todo_data.get(todo_id, {})
+    todo = todo_data.get(todo_id)
+    if todo:
+        return todo
+    raise HTTPException(status_code=404, detail="Todo not found")
 
 
 # DTO로 생각하면 될듯
@@ -38,22 +41,25 @@ class CreateTodoRequest(BaseModel):
     is_done: bool
 
 
-@app.post("/todos")
+@app.post("/todos", status_code=201)
 def create_todo_handler(request: CreateTodoRequest):
     todo_data[request.id] = request.model_dump()
     return todo_data[request.id]
 
 
 # embed=True로 하면 body에 있는 값이 아래의 is_done에 들어간다.(하나의 필드만 뽑아서 사용할 때)
-@app.patch("/todos/{todo_id}")
+@app.patch("/todos/{todo_id}", status_code=200)
 def update_todo_handler(todo_id: int, is_done: bool = Body(..., embed=True)):
     todo = todo_data.get(todo_id, {})
     if todo:
         todo["is_done"] = is_done
         return todo
-    return {}
+    raise HTTPException(status_code=404, detail="Todo not found")
 
 
-@app.delete("/todos/{todo_id}")
+@app.delete("/todos/{todo_id}", status_code=200)
 def delete_todo_handler(todo_id: int):
-    return todo_data.pop(todo_id, None)
+    todo = todo_data.pop(todo_id, None)
+    if todo:
+        return
+    raise HTTPException(status_code=404, detail="Todo not found")
