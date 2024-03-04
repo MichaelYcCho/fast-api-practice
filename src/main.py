@@ -51,5 +51,9 @@ def update_todo_handler(todo_id: int, is_done: bool = Body(..., embed=True)):
     if todo:
         todo["is_done"] = is_done
         return todo
-
     return {}
+
+
+@app.delete("/todos/{todo_id}")
+def delete_todo_handler(todo_id: int):
+    return todo_data.pop(todo_id, None)
