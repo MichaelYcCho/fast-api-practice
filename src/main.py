@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from database.connection import get_db
 
 from database.orm import ToDo
-from database.repository import get_todos
+from database.repository import get_todo_by_todo_id, get_todos
 from schema.response import ListToDoResponse, ToDoSchema
 
 current_file_path = Path(__file__).resolve()
@@ -47,10 +47,8 @@ def get_todos_handler(
 
 
 @app.get("/todos/{todo_id}", status_code=200)
-def get_todo_handler(todo_id: int):
-    todo = todo_data.get(todo_id)
-    if todo:
-        return todo
+def get_todo_handler(todo_id: int, session: Session = Depends(get_db)):
+    todo: ToDo | None = get_todo_by_todo_id(session=session, todo_id=todo_id)
     raise HTTPException(status_code=404, detail="Todo not found")
 
 
