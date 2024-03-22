@@ -13,6 +13,6 @@ class ToDoSchema(BaseModel):
 
 class ListToDoResponse(BaseModel):
     todos: list[ToDoSchema]
-    total_count: int
-    total_done: int
-    total_not_done: int
+    # total_count: int
+    # total_done: int
+    # total_not_done: int
