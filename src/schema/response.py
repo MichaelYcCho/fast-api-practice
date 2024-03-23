@@ -11,7 +11,7 @@ class ToDoSchema(BaseModel):
         from_attributes = True
 
 
-class ListToDoResponse(BaseModel):
+class ToDoResponseSchema(BaseModel):
     todos: list[ToDoSchema]
     # total_count: int
     # total_done: int

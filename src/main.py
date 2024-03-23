@@ -11,8 +11,10 @@ from dotenv import load_dotenv
 from database.connection import get_db
 
 from database.orm import ToDo
-from database.repository import get_todo_by_todo_id, get_todos
-from schema.response import ListToDoResponse, ToDoSchema
+from database.repository import create_todo, get_todo_by_todo_id, get_todos
+from schema.request import CreateTodoRequest
+from schema.response import ToDoResponseSchema, ToDoSchema
+
 
 current_file_path = Path(__file__).resolve()
 BASE_DIR = current_file_path.parent.parent
@@ -36,14 +38,14 @@ todo_data = {
 @app.get("/todos", status_code=200)
 def get_todos_handler(
     order: str | None = None, session: Session = Depends(get_db)
-) -> ListToDoResponse:
+) -> ToDoResponseSchema:
 
     todos: List[ToDo] = get_todos(session)
     if order and order == "DESC":
-        return ListToDoResponse(
+        return ToDoResponseSchema(
             todos=[ToDoSchema.model_validate(todo) for todo in todos[::-1]]
         )
-    return ListToDoResponse(todos=[ToDoSchema.model_validate(todo) for todo in todos])
+    return ToDoResponseSchema(todos=[ToDoSchema.model_validate(todo) for todo in todos])
 
 
 @app.get("/todos/{todo_id}", status_code=200)
@@ -54,17 +56,11 @@ def get_todo_handler(todo_id: int, session: Session = Depends(get_db)):
     raise HTTPException(status_code=404, detail="Todo not found")
 
 
-# DTO로 생각하면 될듯
-class CreateTodoRequest(BaseModel):
-    id: int
-    contents: str
-    is_done: bool
-
-
 @app.post("/todos", status_code=201)
-def create_todo_handler(request: CreateTodoRequest):
-    todo_data[request.id] = request.model_dump()
-    return todo_data[request.id]
+def create_todo_handler(request: CreateTodoRequest, session: Session = Depends(get_db)):
+    todo: ToDo = ToDo.create(request)  # id = None
+    todo: ToDo = create_todo(session=session, todo=todo)  # id = int
+    return ToDoSchema.model_validate(todo)
 
 
 # embed=True로 하면 body에 있는 값이 아래의 is_done에 들어간다.(하나의 필드만 뽑아서 사용할 때)
