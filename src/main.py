@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 from database.connection import get_db
 
 from database.orm import ToDo
-from database.repository import create_todo, get_todo_by_todo_id, get_todos
+from database.repository import create_todo, get_todo_by_todo_id, get_todos, update_todo
 from schema.request import CreateTodoRequest
 from schema.response import ToDoResponseSchema, ToDoSchema
 
@@ -65,11 +65,16 @@ def create_todo_handler(request: CreateTodoRequest, session: Session = Depends(g
 
 # embed=True로 하면 body에 있는 값이 아래의 is_done에 들어간다.(하나의 필드만 뽑아서 사용할 때)
 @app.patch("/todos/{todo_id}", status_code=200)
-def update_todo_handler(todo_id: int, is_done: bool = Body(..., embed=True)):
-    todo = todo_data.get(todo_id, {})
+def update_todo_handler(
+    todo_id: int,
+    is_done: bool = Body(..., embed=True),
+    session: Session = Depends(get_db),
+):
+    todo: ToDo | None = get_todo_by_todo_id(session=session, todo_id=todo_id)
     if todo:
-        todo["is_done"] = is_done
-        return todo
+        todo.done() if is_done else todo.undone
+        todo: ToDo = update_todo(session=session, todo=todo)
+        return ToDoSchema.model_validate(todo)
     raise HTTPException(status_code=404, detail="Todo not found")
 
 

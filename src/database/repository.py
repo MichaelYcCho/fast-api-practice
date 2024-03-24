@@ -15,7 +15,14 @@ def get_todo_by_todo_id(session: Session, todo_id: int) -> ToDo | None:
     return session.scalar(select(ToDo).where(ToDo.id == todo_id))
 
 
-def create_todo(session: Session, todo: ToDo):
+def create_todo(session: Session, todo: ToDo) -> ToDo:
+    session.add(instance=todo)
+    session.commit()
+    session.refresh(instance=todo)
+    return todo
+
+
+def update_todo(session: Session, todo: ToDo) -> ToDo:
     session.add(instance=todo)
     session.commit()
     session.refresh(instance=todo)
