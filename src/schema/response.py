@@ -6,8 +6,7 @@ class ToDoSchema(BaseModel):
     contents: str
     is_done: bool
 
-    class Config:
-        # orm_mode = True
+    class ConfigDict:
         from_attributes = True
 
 
