@@ -1,3 +1,6 @@
+from database.orm import ToDo
+
+
 def test_health_check(client):
     response = client.get("/")
     assert response.status_code == 200
@@ -63,7 +66,9 @@ def test_get_todo_not_found(client, mocker):
     assert response.json() == {"detail": "Todo not found"}
 
 
+# spy : 특정 객체를 트래킹할 수 있다
 def test_create_todo(client, mocker):
+    create_spy = mocker.spy(ToDo, "create")
     mocker.patch(
         "main.create_todo",
         return_value={"id": 1, "contents": "todo", "is_done": True},
@@ -74,5 +79,11 @@ def test_create_todo(client, mocker):
         "is_done": False,
     }
     response = client.post("/todos", json=body)
+    assert create_spy.spy_return.id is None
+    assert create_spy.spy_return.contents == "test"
+    assert create_spy.spy_return.is_done == False
+
+    assert create_spy.call_count == 1
+
     assert response.status_code == 201
     assert response.json() == {"id": 1, "contents": "todo", "is_done": True}
