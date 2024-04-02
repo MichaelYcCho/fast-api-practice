@@ -84,7 +84,7 @@ def update_todo_handler(
     raise HTTPException(status_code=404, detail="Todo not found")
 
 
-@app.delete("/todos/{todo_id}", status_code=200)
+@app.delete("/todos/{todo_id}", status_code=204)
 def delete_todo_handler(
     todo_id: int,
     session: Session = Depends(get_db),
