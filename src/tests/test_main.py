@@ -10,7 +10,7 @@ def test_health_check(client):
 def test_get_todos(client, mocker):
 
     mocker.patch(
-        "main.get_todos",
+        "api.todo.get_todos",
         return_value=[
             {"id": 1, "contents": "buy milk", "is_done": True},
             {"id": 2, "contents": "buy bread", "is_done": True},
@@ -46,7 +46,7 @@ def test_get_todo(client, mocker):
     """
 
     mocker.patch(
-        "main.get_todo_by_todo_id",
+        "api.todo.get_todo_by_todo_id",
         return_value={"id": 1, "contents": "buy milk", "is_done": True},
     )
     response = client.get("/todos/1")
@@ -60,7 +60,7 @@ def test_get_todo_not_found(client, mocker):
     개별 테스트 : pytest src/tests/test_main.py::test_get_todo_not_found
     """
 
-    mocker.patch("main.get_todo_by_todo_id", return_value=None)
+    mocker.patch("api.todo.get_todo_by_todo_id", return_value=None)
     response = client.get("/todos/1")
     assert response.status_code == 404
     assert response.json() == {"detail": "Todo not found"}
@@ -70,7 +70,7 @@ def test_get_todo_not_found(client, mocker):
 def test_create_todo(client, mocker):
     create_spy = mocker.spy(ToDo, "create")
     mocker.patch(
-        "main.create_todo",
+        "api.todo.create_todo",
         return_value={"id": 1, "contents": "todo", "is_done": True},
     )
 
@@ -108,7 +108,7 @@ def test_create_todo(client, mocker):
 
 def test_update_fail_todo(client, mocker):
     mocker.patch(
-        "main.update_todo",
+        "api.todo.update_todo",
         return_value={"id": 1, "contents": "todo", "is_done": True},
     )
 
@@ -120,15 +120,15 @@ def test_update_fail_todo(client, mocker):
 def test_delete_todo(client, mocker):
     # 204
     mocker.patch(
-        "main.get_todo_by_todo_id",
+        "api.todo.get_todo_by_todo_id",
         return_value={"id": 1, "contents": "todo", "is_done": True},
     )
-    mocker.patch("main.delete_todo", return_value=None)
+    mocker.patch("api.todo.delete_todo", return_value=None)
     response = client.delete("/todos/1")
     assert response.status_code == 204
 
     # 404 test
-    mocker.patch("main.get_todo_by_todo_id", return_value=None)
+    mocker.patch("api.todo.get_todo_by_todo_id", return_value=None)
     response = client.delete("/todos/1")
     assert response.status_code == 404
     assert response.json() == {"detail": "Todo not found"}
